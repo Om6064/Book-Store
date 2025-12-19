@@ -1,0 +1,251 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Book Basket Admin</title>
+
+    <!-- Bootstrap -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+
+    <!-- Fonts & Icons -->
+    <link href="https://fonts.googleapis.com/css2?family=Exo+2:wght@300;400;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+    <link rel="icon" href="/assets/images/books-stack-of-three-svgrepo-com.svg">
+    <link rel="stylesheet" href="/assets/css/style.css">
+</head>
+
+<body>
+
+    <!-- ================= NAVBAR ================= -->
+    <nav class="navbar navbar-expand-lg sticky-top">
+        <div class="container">
+            <a class="navbar-brand d-flex align-items-center gap-2" href="/">
+                <i class="fas fa-book-open-reader"></i>
+                <span>Book Basket <small class="opacity-75">Admin</small></span>
+            </a>
+        </div>
+    </nav>
+
+    <!-- ================= MAIN ================= -->
+    <main class="container my-5">
+
+        <!-- ================= FORM CARD ================= -->
+        <section class="glass-card mb-5">
+            <div class="card-header-tech">
+                <i class="fas <%= thatOneData ? 'fa-pen' : 'fa-plus-circle' %>"></i>
+                <span>
+                    <%= thatOneData ? 'Update Book' : 'Add New Book' %>
+                </span>
+            </div>
+
+            <form class="p-4"
+                action="/<%= thatOneData ? `edit-book/${thatOneData.id}` : 'add-book' %>"
+                method="post">
+
+                <div class="row g-4">
+
+                    <!-- BOOK NAME -->
+                    <div class="col-md-6">
+                        <label class="form-label">Book Name</label>
+                        <input type="text" class="form-control"
+                            name="name"
+                            value="<%= thatOneData?.name %>"
+                            placeholder="The Matrix Design"
+                            required>
+                    </div>
+
+                    <!-- AUTHOR -->
+                    <div class="col-md-6">
+                        <label class="form-label">Author</label>
+                        <input type="text" class="form-control"
+                            name="author"
+                            value="<%= thatOneData?.author %>"
+                            placeholder="John Doe"
+                            required>
+                    </div>
+
+                    <!-- PRICE -->
+                    <div class="col-md-4">
+                        <label class="form-label">Price (₹)</label>
+                        <input type="number" class="form-control"
+                            name="price"
+                            value="<%= thatOneData?.price %>"
+                            min="1"
+                            required>
+                    </div>
+
+                    <!-- GENRE -->
+                    <div class="col-md-4">
+                        <label class="form-label">Genre</label>
+                        <select class="form-select" name="genre" required>
+                            <option value="">Select</option>
+                            <option <%=thatOneData?.genre=='Fiction'?'selected':''%>>Fiction</option>
+                            <option <%=thatOneData?.genre=='Non Fiction'?'selected':''%>>Non Fiction</option>
+                            <option <%=thatOneData?.genre=='Mystery'?'selected':''%>>Mystery</option>
+                            <option <%=thatOneData?.genre=='Romance'?'selected':''%>>Romance</option>
+                            <option <%=thatOneData?.genre=='Science'?'selected':''%>>Science</option>
+                            <option <%=thatOneData?.genre=='Fantasy'?'selected':''%>>Fantasy</option>
+                        </select>
+                    </div>
+
+                    <!-- DATE -->
+                    <div class="col-md-4">
+                        <label class="form-label">Publish Date</label>
+                        <input type="date" class="form-control"
+                            name="date"
+                            value="<%= thatOneData?.date %>"
+                            required>
+                    </div>
+
+                    <!-- FORMAT -->
+                    <div class="col-md-8">
+                        <label class="form-label">Book Format</label>
+                        <div class="format-wrapper">
+                            <% ['Hardcover','Paperback','eBook'].forEach((f,i)=>{ %>
+                                <label class="format-pill">
+                                    <input type="radio"
+                                        name="format"
+                                        value="<%=f%>"
+                                        <%=thatOneData?.format==f?'checked':''%>
+                                        <%=!thatOneData && i===0?'required':''%>>
+                                    <span><%=f%></span>
+                                </label>
+                            <% }) %>
+                        </div>
+                    </div>
+
+                    <!-- BESTSELLER -->
+                    <div class="col-md-4 d-flex align-items-end">
+                        <div class="form-check">
+                            <input class="form-check-input"
+                            id="best"
+                                type="checkbox"
+                                name="isBestSeller"
+                                value="yes"
+                                <%=thatOneData?.isBestSeller=='yes'?'checked':''%>>
+                            <label class="form-check-label" for="best">
+                                Bestseller <i class="fas fa-star text-warning ms-1"></i>
+                            </label>
+                        </div>
+                    </div>
+
+                    <!-- ACTION -->
+                    <div class="col-12 text-end">
+                        <button class="btn-primary-glass px-5">
+                            <i class="fas <%= thatOneData?'fa-pen':'fa-plus' %> me-2"></i>
+                            <%= thatOneData ? 'Update Book' : 'Add Book' %>
+                        </button>
+
+                        <% if(thatOneData){ %>
+                            <a href="/" class="cancel-link ms-3">Cancel</a>
+                        <% } %>
+                    </div>
+
+                </div>
+            </form>
+        </section>
+
+        <!-- ================= TABLE CARD ================= -->
+        <section class="glass-card mb-5">
+            <div class="card-header-tech d-flex justify-content-between">
+                <span><i class="fas fa-list me-2"></i> Library Inventory</span>
+                <span class="count-badge">Total: <%= bookData.length %></span>
+            </div>
+
+            <div class="table-responsive px-3 pb-3">
+                <table class="table align-middle">
+                    <thead>
+                        <tr>
+                            <th>#</th>
+                            <th>Book</th>
+                            <th>Genre</th>
+                            <th>Format</th>
+                            <th>Price</th>
+                            <th>Date</th>
+                            <th class="text-center">Actions</th>
+                        </tr>
+                    </thead>
+
+                    <tbody>
+                        <% if(bookData.length===0){ %>
+                            <tr>
+                                <td colspan="7" class="empty-state">
+                                    <i class="fas fa-folder-open fa-3x mb-3"></i>
+                                    <p>No books available</p>
+                                </td>
+                            </tr>
+                        <% } %>
+
+                        <% bookData.forEach((book,idx)=>{ %>
+                            <tr class="table-row-glass">
+                                <td><%= idx+1 %></td>
+                                <td>
+                                    <strong><%= book.name %></strong>
+                                    <div class="small text-info"><%= book.author %></div>
+                                    <% if(book.isBestSeller=='yes'){ %>
+                                        <div class="badge-bestseller">Bestseller</div>
+                                    <% } %>
+                                </td>
+                                <td><span class="badge-genre"><%= book.genre %></span></td>
+                                <td><i class="fas fa-book me-1"></i> <%= book.format %></td>
+                                <td class="price-tag">₹<%= book.price %></td>
+                                <td class="small"><%= book.date %></td>
+                                <td class="text-center">
+                                    <a href="/edit-book/<%=book.id%>" class="action-btn btn-edit">
+                                        <i class="fas fa-pen"></i>
+                                    </a>
+                                    <button onclick="handeleDelete('<%=book.id%>')" class="action-btn btn-delete">
+                                        <i class="fas fa-trash"></i>
+                                    </button>
+                                </td>
+                            </tr>
+                        <% }) %>
+                    </tbody>
+                </table>
+            </div>
+        </section>
+
+    </main>
+
+    <!-- ================= SCRIPTS ================= -->
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
+    <script>
+        const handeleDelete = (id) => {
+            Swal.fire({
+                title: "Are you sure?",
+                text: "You won't be able to revert this!",
+                icon: "warning",
+                color: "#fff",
+                background: "#15192b",
+                showCancelButton: true,
+                confirmButtonColor: "#8b5cf6",
+                cancelButtonColor: "#333",
+                confirmButtonText: "Yes, Delete"
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    window.location.href = `/delete-book/${id}`;
+                }
+            });
+        };
+
+        const url = new URL(window.location.href);
+        const error = url.searchParams.get("error");
+        if (error) {
+            Swal.fire({
+                icon: "error",
+                title: "Oops...",
+                text: error
+            }).then(() => {
+                window.history.replaceState({}, document.title, "/");
+            });
+        }
+    </script>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+
+</html>
